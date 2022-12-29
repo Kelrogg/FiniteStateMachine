@@ -1,0 +1,37 @@
+[
+{
+  "directory": "/home/kelrogg/Projects/Fsm/build",
+  "command": "/usr/bin/g++  -I/home/kelrogg/Projects/Fsm/headers -g -Winvalid-pch -x c++-header -include /home/kelrogg/Projects/Fsm/build/CMakeFiles/FsmConverter.dir/cmake_pch.hxx -o CMakeFiles/FsmConverter.dir/cmake_pch.hxx.gch -c /home/kelrogg/Projects/Fsm/build/CMakeFiles/FsmConverter.dir/cmake_pch.hxx.cxx",
+  "file": "/home/kelrogg/Projects/Fsm/build/CMakeFiles/FsmConverter.dir/cmake_pch.hxx.cxx"
+},
+{
+  "directory": "/home/kelrogg/Projects/Fsm/build",
+  "command": "/usr/bin/g++  -I/home/kelrogg/Projects/Fsm/headers -g -Winvalid-pch -include /home/kelrogg/Projects/Fsm/build/CMakeFiles/FsmConverter.dir/cmake_pch.hxx -o CMakeFiles/FsmConverter.dir/main.cpp.o -c /home/kelrogg/Projects/Fsm/main.cpp",
+  "file": "/home/kelrogg/Projects/Fsm/main.cpp"
+},
+{
+  "directory": "/home/kelrogg/Projects/Fsm/build",
+  "command": "/usr/bin/g++  -I/home/kelrogg/Projects/Fsm/headers -g -Winvalid-pch -include /home/kelrogg/Projects/Fsm/build/CMakeFiles/FsmConverter.dir/cmake_pch.hxx -o CMakeFiles/FsmConverter.dir/src/Fsm.cpp.o -c /home/kelrogg/Projects/Fsm/src/Fsm.cpp",
+  "file": "/home/kelrogg/Projects/Fsm/src/Fsm.cpp"
+},
+{
+  "directory": "/home/kelrogg/Projects/Fsm/build",
+  "command": "/usr/bin/g++  -I/home/kelrogg/Projects/Fsm/headers -g -Winvalid-pch -include /home/kelrogg/Projects/Fsm/build/CMakeFiles/FsmConverter.dir/cmake_pch.hxx -o CMakeFiles/FsmConverter.dir/src/FsmConverter.cpp.o -c /home/kelrogg/Projects/Fsm/src/FsmConverter.cpp",
+  "file": "/home/kelrogg/Projects/Fsm/src/FsmConverter.cpp"
+},
+{
+  "directory": "/home/kelrogg/Projects/Fsm/build",
+  "command": "/usr/bin/g++  -I/home/kelrogg/Projects/Fsm/headers -g -Winvalid-pch -include /home/kelrogg/Projects/Fsm/build/CMakeFiles/FsmConverter.dir/cmake_pch.hxx -o CMakeFiles/FsmConverter.dir/src/MealyFsm.cpp.o -c /home/kelrogg/Projects/Fsm/src/MealyFsm.cpp",
+  "file": "/home/kelrogg/Projects/Fsm/src/MealyFsm.cpp"
+},
+{
+  "directory": "/home/kelrogg/Projects/Fsm/build",
+  "command": "/usr/bin/g++  -I/home/kelrogg/Projects/Fsm/headers -g -Winvalid-pch -include /home/kelrogg/Projects/Fsm/build/CMakeFiles/FsmConverter.dir/cmake_pch.hxx -o CMakeFiles/FsmConverter.dir/src/MooreFsm.cpp.o -c /home/kelrogg/Projects/Fsm/src/MooreFsm.cpp",
+  "file": "/home/kelrogg/Projects/Fsm/src/MooreFsm.cpp"
+},
+{
+  "directory": "/home/kelrogg/Projects/Fsm/build",
+  "command": "/usr/bin/g++  -I/home/kelrogg/Projects/Fsm/headers -g -Winvalid-pch -include /home/kelrogg/Projects/Fsm/build/CMakeFiles/FsmConverter.dir/cmake_pch.hxx -o CMakeFiles/FsmConverter.dir/src/pch.cpp.o -c /home/kelrogg/Projects/Fsm/src/pch.cpp",
+  "file": "/home/kelrogg/Projects/Fsm/src/pch.cpp"
+}
+]
