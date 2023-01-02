@@ -18,6 +18,7 @@ public:
                 Signal entrySignal, 
                 State destState);
     void RebindExitSignal(State state, Signal exitSignal);
+    void SweepUnreachableStates() override;
     void Read(std::istream& input) override;
     void Print(std::ostream& output) const override;
 

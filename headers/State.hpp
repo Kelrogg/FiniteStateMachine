@@ -3,6 +3,7 @@
 
 struct State {
     unsigned m_index;
+    bool m_isOk = true;
 
     State() : m_index() {}
     State(unsigned i) : m_index(i) {}
@@ -12,9 +13,12 @@ struct State {
         return *this;
     }
 
-    unsigned& Index() {
-        return m_index;
-    }
+    inline unsigned Index() const { return m_index; }
+    inline bool IsOk() const { return m_isOk; }
+    void SetFail() { m_isOk = false; }    
+    void SetGood() { m_isOk = true; }
+    
+    static inline char failStateSymbol = '-';
 };
 
 struct Signal {
@@ -28,7 +32,7 @@ struct Signal {
         return *this;
     }
 
-    unsigned& Index() {
+    inline unsigned Index() const {
         return m_index;
     }
 };

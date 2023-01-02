@@ -8,24 +8,39 @@ MooreFsm FsmConverter::ConvertToMoore(Fsm const& machine){
     // Generate new states for Moore
     for (unsigned state = 0; state < machine.GetStateQuantity(); ++state)
         for (unsigned signal = 0; signal < machine.GetEntrySignalQuantity(); ++signal)
-            alphabet.insert(machine.GetTransition(state, signal));
+            {
+                auto const& [fsmState, fsmSignal] = machine.GetTransition(state, signal);
+                if (fsmState.IsOk())
+                    alphabet.emplace(fsmState, fsmSignal);
+            }
 
     MooreFsm moore(alphabet.size(), machine.GetEntrySignalQuantity());
     
-    for (auto it = alphabet.cbegin(); it != alphabet.cend(); ++it) {
-        auto const& [mealyState, _] = *it;
-        State mooreSourceState = std::distance(alphabet.cbegin(), it); // TODO unordered_map[] instead set.find() (std::hash for Transition)
+    unsigned stateIndex = 0;
+    for (auto const& [mealyState, _] : alphabet) {
+        State mooreSourceState = stateIndex;
 
         for (unsigned signal = 0; signal < machine.GetEntrySignalQuantity(); ++signal) {
-            State destState = std::distance(alphabet.cbegin(),
-                alphabet.find(machine.GetTransition(mealyState, signal))
-            );
+            auto const& [fsmState, fsmSignal] = machine.GetTransition(mealyState, signal);
+            
+            State destState;
+            if (fsmState.IsOk())
+                destState = std::distance(alphabet.cbegin(),
+                    alphabet.find(machine.GetTransition(mealyState, signal)) // TODO unordered_map[] instead set.find() (std::hash for Transition)
+                );
+            else 
+                destState.SetFail();
+
             moore.AddRule(mooreSourceState, signal, destState);
         }
+
+        ++stateIndex;
     }
 
-    for (auto it = alphabet.cbegin(); it != alphabet.cend(); ++it) {
-        moore.RebindExitSignal(std::distance(alphabet.cbegin(), it), it->second);
+    stateIndex = 0;
+    for (auto& [_, signal] : alphabet) {
+        moore.RebindExitSignal(stateIndex, signal);
+        ++stateIndex;
     }
 
     return moore;

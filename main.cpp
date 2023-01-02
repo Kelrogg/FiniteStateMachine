@@ -7,11 +7,11 @@
 
 int main(int, char**) {
     //MooreFsm machine;
-    MooreFsm machine;
-    std::ifstream in{"input1.txt"};
+    MealyFsm machine;
+    std::ifstream in{"input.txt"};
     std::ofstream out{"output.txt"};
     machine.Read(in);
     FsmConverter b;
-    MealyFsm a = b.ConvertToMealy(machine);
+    MooreFsm a = b.ConvertToMoore(machine);
     a.Print(out);
 }

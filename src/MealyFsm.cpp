@@ -14,6 +14,10 @@ MealyFsm::MealyFsm(size_t stateQty, size_t entrySignalQty)
     SetIdentifiers();
 };
 
+void MealyFsm::SweepUnreachableStates() {
+    
+}
+
 inline size_t ReadIdentifier(std::string const& input, std::string& line, size_t pos = 0)
 {
     auto beg = input.begin();
@@ -29,16 +33,23 @@ inline size_t ReadIdentifier(std::string const& input, std::string& line, size_t
 inline size_t ReadTransition(std::string const& input,
                             MealyFsm::Transition& transition, size_t pos = 0)
 {
+    auto& [state, signal] = transition;
     auto beg = input.begin();
     std::advance(beg, pos);
 
+    auto failState = std::find(beg, input.cend(), State::failStateSymbol);
+
     beg = std::find_if(beg, input.end(), isdigit);
+    if (beg > failState) {
+        state.SetFail();
+        return std::distance(input.begin(), std::next(failState));
+    }
     auto end = std::find_if_not(beg, input.end(), isdigit);
-    transition.first = stounsigned(beg, end);
+    state = stounsigned(beg, end);
 
     beg = std::find_if(end, input.end(), isdigit);
     end = std::find_if_not(beg, input.end(), isdigit);
-    transition.second = stounsigned(beg, end);
+    signal = stounsigned(beg, end);
 
     return std::distance(input.begin(), end);
 }
@@ -92,8 +103,11 @@ void MealyFsm::Print(std::ostream& output) const {
     for (auto stateRow = m_table.cbegin(); stateRow < m_table.cend(); ++stateRow) {
         for (auto cell = stateRow->cbegin(); cell < stateRow->cend(); ++cell) {
             auto& [destState, exitSignal] = *cell;
-            output << m_stateIdentifier << destState << ' '
-                    << m_exitSignalIdentifier << exitSignal << ' ';
+            if (destState.IsOk())
+                output << m_stateIdentifier << destState << ' '
+                        << m_exitSignalIdentifier << exitSignal << ' ';
+            else 
+                output << State::failStateSymbol << ' ';
         }
         output << '\n';
     }
@@ -119,15 +133,21 @@ unsigned MealyFsm::GetEntrySignalQuantity() const {
 }
 
 MealyFsm::Transition MealyFsm::GetTransition(State source, Signal entry) const {
-    if (m_table.size() <= source.Index() || m_table[0].size() <= entry.Index()) {
+    if (!source.IsOk() || 
+        m_table.size() <= source.Index() || m_table[0].size() <= entry.Index()
+    ) {
         throw std::out_of_range("Wrong index");
     }
     return m_table[source.Index()][entry.Index()];
 }
 
-void MealyFsm::AddRule(State sourceState, Signal entrySignal, State destState, Signal exitSignal) {
-    if (m_table.size() <= sourceState.Index() || m_table[0].size() <= entrySignal.Index()) {
+void MealyFsm::AddRule(State source, Signal entrySignal, State dest, Signal exitSignal) {
+    if (!source.IsOk()) {
+        throw std::logic_error("Cannot make transition from empty state");
+    }
+
+    if (m_table.size() <= source.Index() || m_table[0].size() <= entrySignal.Index()) {
         throw std::out_of_range("Wrong index");
     }
-    m_table[sourceState.Index()][entrySignal.Index()] = {destState, exitSignal};
+    m_table[source.Index()][entrySignal.Index()] = {dest, exitSignal};
 }

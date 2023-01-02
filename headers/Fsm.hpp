@@ -7,6 +7,7 @@ class Fsm {
 public:
     using Transition = std::pair<State, Signal>;
 
+    virtual void SweepUnreachableStates() = 0;
     virtual void Read(std::istream& input) = 0;
     virtual void Print(std::ostream& output) const = 0;
 

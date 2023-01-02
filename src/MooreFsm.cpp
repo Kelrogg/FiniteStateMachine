@@ -15,6 +15,10 @@ MooreFsm::MooreFsm(size_t stateQty, size_t entrySignalQty)
     SetIdentifiers();
 };
 
+void MooreFsm::SweepUnreachableStates() {
+    
+}
+
 inline size_t ReadIdentifier(std::string const& input, std::string& line, size_t pos = 0)
 {
     auto beg = input.begin();
@@ -32,9 +36,16 @@ inline size_t ReadState(std::string const& input,
 {
     auto beg = input.begin();
     std::advance(beg, pos);
+    
+    auto failState = std::find(beg, input.cend(), State::failStateSymbol);
 
-    beg = std::find_if(beg, input.end(), isdigit);
-    auto end = std::find_if_not(beg, input.end(), isdigit);
+    beg = std::find_if(beg, input.cend(), isdigit);
+    if (beg > failState) {
+        state.SetFail();
+        return std::distance(input.begin(), std::next(failState));
+    }
+
+    auto end = std::find_if_not(beg, input.cend(), isdigit);
     state = stounsigned(beg, end);
 
     return std::distance(input.begin(), end);
@@ -46,8 +57,8 @@ inline size_t ReadSignal(std::string const& input,
     auto beg = input.begin();
     std::advance(beg, pos);
 
-    beg = std::find_if(beg, input.end(), isdigit);
-    auto end = std::find_if_not(beg, input.end(), isdigit);
+    beg = std::find_if(beg, input.cend(), isdigit);
+    auto end = std::find_if_not(beg, input.cend(), isdigit);
     exitSignal = stounsigned(beg, end);
 
     return std::distance(input.begin(), end);
@@ -72,8 +83,10 @@ void MooreFsm::Read(std::istream& input) {
 
     Resize(stateQty, entrySignalQty);
 
-    //TODO 
-    std::getline(input, line);
+    //TODO
+    do {
+        std::getline(input, line);
+    } while (line.find(State::failStateSymbol) == std::string::npos);
 
     size_t pos = ReadIdentifier(line, m_exitSignalIdentifier);
     ReadIdentifier(line, m_stateIdentifier, pos);
@@ -106,8 +119,11 @@ void MooreFsm::Print(std::ostream& output) const {
     auto binding = m_bindings.cbegin();
     for (auto stateRow = m_table.cbegin(); stateRow < m_table.cend(); ++stateRow, ++binding) {
         output << m_exitSignalIdentifier << *binding << ' ';
-        for (auto cell = stateRow->cbegin(); cell < stateRow->cend(); ++cell) {
-            output << m_stateIdentifier << *cell << ' ';
+        for (auto state = stateRow->cbegin(); state < stateRow->cend(); ++state) {
+            if (state->IsOk())
+                output << m_stateIdentifier << *state << ' ';
+            else
+                output << State::failStateSymbol << ' ';
         }
         output << '\n';
     }
@@ -135,7 +151,9 @@ unsigned MooreFsm::GetEntrySignalQuantity() const {
 }
 
 MooreFsm::Transition MooreFsm::GetTransition(State source, Signal entry) const {
-    if (m_table.size() <= source.Index() || m_table[0].size() <= entry.Index()) {
+    if (!source.IsOk() ||
+        m_table.size() <= source.Index() || m_table[0].size() <= entry.Index()
+    ) {
         throw std::out_of_range("Wrong index");
     }
 
@@ -145,15 +163,23 @@ MooreFsm::Transition MooreFsm::GetTransition(State source, Signal entry) const {
 }
 
 void MooreFsm::RebindExitSignal(State state, Signal exitSignal) {
+    if (!state.IsOk()) {
+        throw std::logic_error("Cannot bind exit signal to empty state");
+    }
+
     if (m_bindings.size() <= state.Index()) {
         throw std::out_of_range("Wrong index");
     }
     m_bindings[state.Index()] = exitSignal;
 }
 
-void MooreFsm::AddRule(State sourceState, Signal entrySignal, State destState) {
-    if (m_table.size() <= sourceState.Index() || m_table[0].size() <= entrySignal.Index()) {
+void MooreFsm::AddRule(State source, Signal entrySignal, State dest) {
+    if (!source.IsOk()) {
+        throw std::logic_error("Cannot make transition from empty state");
+    }
+
+    if (m_table.size() <= source.Index() || m_table[0].size() <= entrySignal.Index()) {
         throw std::out_of_range("Wrong index");
     }
-    m_table[sourceState.Index()][entrySignal.Index()] = destState;
+    m_table[source.Index()][entrySignal.Index()] = dest;
 }

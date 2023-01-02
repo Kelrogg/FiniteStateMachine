@@ -1,5 +1,0 @@
-/home/kelrogg/Projects/Fsm/build/CMakeFiles/FsmConverter.dir
-/home/kelrogg/Projects/Fsm/build/CMakeFiles/package.dir
-/home/kelrogg/Projects/Fsm/build/CMakeFiles/package_source.dir
-/home/kelrogg/Projects/Fsm/build/CMakeFiles/edit_cache.dir
-/home/kelrogg/Projects/Fsm/build/CMakeFiles/rebuild_cache.dir
