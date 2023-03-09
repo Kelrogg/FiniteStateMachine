@@ -19,13 +19,16 @@ public:
                 State destState);
     void RebindExitSignal(State state, Signal exitSignal);
     void SweepUnreachableStates() override;
+    void Minimize() override;
     void Read(std::istream& input) override;
     void Print(std::ostream& output) const override;
 
-    unsigned GetStateQuantity() const override;
-    unsigned GetEntrySignalQuantity() const override;
+    inline unsigned GetStateQuantity() const noexcept override;
+    inline unsigned GetEntrySignalQuantity() const noexcept override;
     Fsm::Transition GetTransition(State, Signal) const override;
-
+protected:
+    std::vector<StateClass> InitialSplit() const override;
+    
 private:
     void SetIdentifiers();
     void Resize(size_t stateQty, size_t entrySignalQty);

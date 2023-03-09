@@ -14,7 +14,7 @@ public:
     using MooreTable = MooreFsm::Table;
 
     MooreFsm ConvertToMoore(Fsm const& machine);
-    MealyFsm ConvertToMealy(Fsm const& machine);
+    //MealyFsm ConvertToMealy(Fsm const& machine);
 };
 
 #endif

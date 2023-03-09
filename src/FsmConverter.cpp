@@ -46,15 +46,15 @@ MooreFsm FsmConverter::ConvertToMoore(Fsm const& machine){
     return moore;
 }
 
-MealyFsm FsmConverter::ConvertToMealy(Fsm const& machine) {
-    MealyFsm mealy(machine.GetStateQuantity(), machine.GetEntrySignalQuantity());
-    
-    for (unsigned state = 0; state < machine.GetStateQuantity(); ++state) {
-        for (unsigned signal = 0; signal < machine.GetEntrySignalQuantity(); ++signal) {
-            auto const& [destState, bindSignal] = machine.GetTransition(state, signal);
-            mealy.AddRule(state, signal, destState, bindSignal);
-        }
-    }
-
-    return mealy;
-}
+//MealyFsm FsmConverter::ConvertToMealy(Fsm const& machine) {
+//    MealyFsm mealy(machine.GetStateQuantity(), machine.GetEntrySignalQuantity());
+//    
+//    for (unsigned state = 0; state < machine.GetStateQuantity(); ++state) {
+//        for (unsigned signal = 0; signal < machine.GetEntrySignalQuantity(); ++signal) {
+//            auto const& [destState, bindSignal] = machine.GetTransition(state, signal);
+//            mealy.AddRule(state, signal, destState, bindSignal);
+//        }
+//    }
+//
+//    return mealy;
+//}

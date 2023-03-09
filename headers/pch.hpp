@@ -2,6 +2,9 @@
 #define PCH_HPP
 
 #include <set>
+#include <map>
+#include <tuple>
+#include <queue>
 #include <regex>
 #include <cctype>
 #include <string>
@@ -16,5 +19,6 @@
 #include <functional>
 #include <string_view>
 #include <unordered_map>
+#include <unordered_set>
 
 #endif

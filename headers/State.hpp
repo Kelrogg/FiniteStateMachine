@@ -1,24 +1,45 @@
-#ifndef MEALY_STATE_HPP
-#define MEALY_STATE_HPP
+#ifndef STATE_HPP
+#define STATE_HPP
 
 struct State {
     unsigned m_index;
     bool m_isOk = true;
+    bool m_isTerm = false;
+
+    static inline char failStateSymbol = '-';
 
     State() : m_index() {}
     State(unsigned i) : m_index(i) {}
 
-    State& operator= (unsigned a) {
+    State& operator= (unsigned a) noexcept {
         m_index = a;
         return *this;
     }
 
-    inline unsigned Index() const { return m_index; }
-    inline bool IsOk() const { return m_isOk; }
-    void SetFail() { m_isOk = false; }    
-    void SetGood() { m_isOk = true; }
+    inline unsigned Index() const noexcept { return m_index; }
+    inline bool IsOk() const noexcept { return m_isOk; }
+    inline bool IsTerm() const noexcept { return m_isTerm; }
+    void SetFail() noexcept { m_isOk = false; }    
+    void SetGood() noexcept { m_isOk = true; }
     
-    static inline char failStateSymbol = '-';
+
+    inline State& operator-= (State const& rhs) {
+        m_index -= rhs.m_index;
+        return *this;
+    }
+    
+    inline State& operator+= (State const& rhs) {
+        m_index += rhs.m_index;
+        return *this;
+    }
+    
+    inline unsigned operator- (State const& rhs) {
+        return m_index - rhs.m_index;
+    }
+
+    inline unsigned operator+ (State const& rhs) {
+        return m_index + rhs.m_index;
+    }
 };
 
 struct Signal {
@@ -85,4 +106,4 @@ inline std::ostream& operator<< (std::ostream& output, Signal const& signal) {
     return output << signal.m_index;
 }
 
-#endif // MEALY_STATE_HPP
+#endif // STATE_HPP

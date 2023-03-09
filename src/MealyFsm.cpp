@@ -14,8 +14,63 @@ MealyFsm::MealyFsm(size_t stateQty, size_t entrySignalQty)
     SetIdentifiers();
 };
 
+std::vector<MealyFsm::StateClass> MealyFsm::InitialSplit() const {
+    return std::vector<MealyFsm::StateClass>();
+};
+
 void MealyFsm::SweepUnreachableStates() {
-    
+    if (GetStateQuantity() == 0) return;
+
+    std::vector<unsigned> offset;
+    offset.reserve(GetStateQuantity());
+
+    std::vector<bool> reachableState(GetStateQuantity());
+    *reachableState.begin() = true;
+
+    std::queue<State> q;
+    q.push(0);
+    unsigned newStateQuantity = 1;
+
+    // find unreachable
+    while (!q.empty()) {
+        State currentState = q.front(); q.pop();
+        for (unsigned entrySignal = 0; entrySignal < GetEntrySignalQuantity(); ++entrySignal) 
+        {
+            auto const& [state, signal] = GetTransition(currentState, entrySignal);
+            if (state.IsOk() && !reachableState[state.Index()]) {
+                reachableState[state.Index()] = true;
+                q.push(state);
+                ++newStateQuantity;
+            }
+        }
+    }
+
+    // fast erase unreachable
+    Table newTable;
+    newTable.reserve(newStateQuantity);
+
+    unsigned stateIndex = 0;
+    for (auto const& inTable : reachableState) {
+        if (inTable) {
+            newTable.push_back(std::move(m_table[stateIndex]));
+        }
+        ++stateIndex;
+    }
+    m_table = std::move(newTable);
+
+    // recalculate table states
+    unsigned int stateOffset = 0;
+    for (auto const& isReachable : reachableState) {
+        offset.push_back(stateOffset);
+        if (!isReachable) 
+            ++stateOffset;
+    }
+    for (auto& row : m_table)
+        for (unsigned i = 0; i < row.size(); ++i) {
+            auto& [state, _] = row[i];
+            if (state.IsOk())
+                state -= offset[state.Index()];
+        }
 }
 
 inline size_t ReadIdentifier(std::string const& input, std::string& line, size_t pos = 0)
@@ -97,6 +152,7 @@ void MealyFsm::Read(std::istream& input) {
         }
     }
     //
+    SweepUnreachableStates();
 }
 
 void MealyFsm::Print(std::ostream& output) const {
@@ -124,11 +180,11 @@ void MealyFsm::SetIdentifiers() {
     m_stateIdentifier = "S";    
 }
 
-unsigned MealyFsm::GetStateQuantity() const {
+inline unsigned MealyFsm::GetStateQuantity() const noexcept {
     return m_table.size();
 }
 
-unsigned MealyFsm::GetEntrySignalQuantity() const {
+inline unsigned MealyFsm::GetEntrySignalQuantity() const noexcept {
     return m_table.empty() ? 0 : m_table[0].size();
 }
 

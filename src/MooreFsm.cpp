@@ -15,8 +15,90 @@ MooreFsm::MooreFsm(size_t stateQty, size_t entrySignalQty)
     SetIdentifiers();
 };
 
+std::vector<MooreFsm::StateClass> MooreFsm::InitialSplit() const {
+    std::vector<StateClass> split;
+//    std::map<unsigned, StateClass> tempSplit;
+//
+//    for (unsigned state = 0; state < m_bindings.size(); ++state) {
+//        unsigned exitSignal = m_bindings[state].Index();
+//        auto it = tempSplit.find(exitSignal);
+//
+//        if (it != tempSplit.cend()) {
+//            auto& [key, states] = *it;
+//            states.emplace(state);
+//        }
+//        else {
+//            tempSplit.emplace(exitSignal, state);
+//        }
+//    }
+//
+//    split.reserve(tempSplit.size());
+//    for (auto& el : tempSplit) {
+//        split.push_back(std::move(el.second));
+//    }
+    return split;
+};
+
+void MooreFsm::Minimize() {
+    Fsm::Minimize();
+}
+
 void MooreFsm::SweepUnreachableStates() {
-    
+    if (GetStateQuantity() == 0) return;
+
+    std::vector<bool> reachableState(GetStateQuantity());
+    *reachableState.begin() = true;
+
+    std::queue<State> q;
+    q.push(0);
+    unsigned newStateQuantity = 1;
+
+    // find unreachable
+    while (!q.empty()) {
+        State currentState = q.front(); q.pop();
+        for (unsigned entrySignal = 0; entrySignal < GetEntrySignalQuantity(); ++entrySignal) 
+        {
+            auto const& [state, signal] = GetTransition(currentState, entrySignal);
+            if (state.IsOk() && !reachableState[state.Index()]) {
+                reachableState[state.Index()] = true;
+                q.push(state);
+                ++newStateQuantity;
+            }
+        }
+    }
+
+    // fast erase unreachable
+    Table newTable;
+    newTable.reserve(newStateQuantity);
+    SignalBindings newBindings;
+    newBindings.reserve(newStateQuantity);
+
+    unsigned stateIndex = 0;
+    for (auto const& inTable : reachableState) {
+        if (inTable) {
+            newTable.push_back(std::move(m_table[stateIndex]));
+            newBindings.push_back(m_bindings[stateIndex]);
+        }
+        ++stateIndex;
+    }
+    m_table = std::move(newTable);
+    m_bindings = std::move(newBindings);
+
+    // recalculate table states
+    std::vector<unsigned> offset; 
+    offset.reserve(newStateQuantity);
+    unsigned int stateOffset = 0;
+
+    for (auto const& isReachable : reachableState) {
+        if (isReachable)
+            offset.push_back(stateOffset);
+        else
+            ++stateOffset;
+    }
+    for (auto& row : m_table)
+        for (unsigned i = 0; i < row.size(); ++i)
+            if (row[i].IsOk())
+                row[i] -= offset[row[i].Index()];
 }
 
 inline size_t ReadIdentifier(std::string const& input, std::string& line, size_t pos = 0)
@@ -113,6 +195,7 @@ void MooreFsm::Read(std::istream& input) {
         }
     }
     //
+    SweepUnreachableStates();
 }
 
 void MooreFsm::Print(std::ostream& output) const {
@@ -142,11 +225,11 @@ void MooreFsm::SetIdentifiers() {
     m_stateIdentifier = "q";    
 }
 
-unsigned MooreFsm::GetStateQuantity() const {
+inline unsigned MooreFsm::GetStateQuantity() const noexcept {
     return m_table.size();
 }
 
-unsigned MooreFsm::GetEntrySignalQuantity() const {
+inline unsigned MooreFsm::GetEntrySignalQuantity() const noexcept {
     return m_table.empty() ? 0 : m_table[0].size();
 }
 
